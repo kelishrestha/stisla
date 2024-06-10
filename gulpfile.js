@@ -14,6 +14,7 @@ const nunjucks = require('gulp-nunjucks');
 const color = require('gulp-color');
 const nodePath = require('path');
 const uglifyCss = require('gulp-uglifycss');
+const uglifyjs = require('gulp-uglify');
 
 /**
  * Configuration
@@ -119,9 +120,9 @@ function _log(str, clr) {
 
 function _minifyCSS(path, onEnd, log=true, ret=false) {
   if(log)
-    _log('[SCSS] Compiling:' + path, 'GREEN');
+    _log('[SCSS] Minifying:' + path, 'GREEN');
 
-  let compileToSCSS = src(path)
+  let minifyCSS = src(path)
   .pipe(plumber())
   .pipe(sass({
     errorLogToConsole: true
@@ -132,7 +133,7 @@ function _minifyCSS(path, onEnd, log=true, ret=false) {
       onEnd.call(this);
 
     if(log)
-      _log('[SCSS] Finished', 'GREEN');
+      _log('[SCSS] minifying Finished', 'GREEN');
   })
   .pipe(postcss([autoprefixer()]))
   .pipe(uglifyCss())
@@ -143,7 +144,31 @@ function _minifyCSS(path, onEnd, log=true, ret=false) {
   .pipe(dest(cssMinDir))
   .pipe(plumber.stop());
 
-  if(ret) return compileToSCSS;
+  if(ret) return minifyCSS;
+}
+
+function _minifyJS(path, onEnd, log=true, ret=false) {
+  if(log)
+    _log('[JS] Minifying:' + path, 'GREEN');
+
+  let minifyJS = src(path)
+  .pipe(plumber())
+  .pipe(uglifyjs())
+  .pipe(rename({
+    dirname: '',
+    extname: '.min.js'
+  }))
+  .pipe(dest(jsMinDir))
+  .on('end', () => {
+    if(onEnd)
+      onEnd.call(this);
+
+    if(log)
+      _log('[JS] minified Finished', 'GREEN');
+  })
+  .pipe(plumber.stop());
+
+  if(ret) return minifyJS;
 }
 
 /**
@@ -183,10 +208,14 @@ function minifyCSS() {
   return _minifyCSS(scssDir + scssPathPattern, null, false, true);
 }
 
+function minifyJS() {
+  jsPathPattern = "/*.js"
+  return _minifyJS(jsDir + jsPathPattern, null, false, true);
+}
+
 function watching() {
   compileToSCSS();
   compileToHTML();
-  minifyCSS();
 
   /**
    * BrowserSync initialization
@@ -239,6 +268,7 @@ Object.assign(exports, {
   scss: compileToSCSS,
   html: compileToHTML,
   minifycss: minifyCSS,
-  dist: parallel(folder, compileToSCSS, compileToHTML, minifyCSS),
+  minifyjs: minifyJS,
+  dist: parallel(folder, compileToSCSS, compileToHTML, minifyCSS, minifyJS),
   default: watching
 });
