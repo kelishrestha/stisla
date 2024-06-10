@@ -1,6 +1,6 @@
 {
   "name": "stisla",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Stisla - Free Bootstrap Admin Template",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "dev": "gulp"
   },
   "repository": "https://github.com/kelishrestha/stisla",
-  "author": "Nauval Azhar <nauvalazhar2@gmail.com> (https://getstisla.com)",
+  "author": "Kelina Shrestha",
   "license": "MIT",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.7.2",
@@ -67,6 +67,7 @@
     "gulp-sass": "^5.1.0",
     "gulp-uglify": "^3.0.1",
     "gulp-uglify-es": "^1.0.4",
+    "gulp-uglifycss": "^1.1.0",
     "imagemin-mozjpeg": "^8.0.0",
     "nunjucks": "^3.2.3",
     "postcss": "^8.4.19",

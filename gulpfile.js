@@ -13,6 +13,8 @@ const imageminMozjpeg = require('imagemin-mozjpeg');
 const nunjucks = require('gulp-nunjucks');
 const color = require('gulp-color');
 const nodePath = require('path');
+const uglifyCss = require('gulp-uglifycss');
+const uglifyjs = require('gulp-uglify');
 
 /**
  * Configuration
@@ -23,6 +25,11 @@ let cssDir = 'assets/css',
     htmlDir = 'src/pages',
     scssDir = 'src/scss',
     imgDir = 'assets/img';
+
+// Minify directory
+
+let cssMinDir = 'dist/css',
+jsMinDir = 'dist/js';
 
 let jsPathPattern = '/**/*.js',
     htmlPathPattern = '/**/*.html',
@@ -109,6 +116,61 @@ function _log(str, clr) {
   console.log(color(str, clr));
 }
 
+// Minification
+
+function _minifyCSS(path, onEnd, log=true, ret=false) {
+  if(log)
+    _log('[SCSS] Minifying:' + path, 'GREEN');
+
+  let minifyCSS = src(path)
+  .pipe(plumber())
+  .pipe(sass({
+    errorLogToConsole: true
+  }))
+  .on('error', console.error.bind(console))
+  .on('end', () => {
+    if(onEnd)
+      onEnd.call(this);
+
+    if(log)
+      _log('[SCSS] minifying Finished', 'GREEN');
+  })
+  .pipe(postcss([autoprefixer()]))
+  .pipe(uglifyCss())
+  .pipe(rename({
+    dirname: '',
+    extname: '.min.css'
+  }))
+  .pipe(dest(cssMinDir))
+  .pipe(plumber.stop());
+
+  if(ret) return minifyCSS;
+}
+
+function _minifyJS(path, onEnd, log=true, ret=false) {
+  if(log)
+    _log('[JS] Minifying:' + path, 'GREEN');
+
+  let minifyJS = src(path)
+  .pipe(plumber())
+  .pipe(uglifyjs())
+  .pipe(rename({
+    dirname: '',
+    extname: '.min.js'
+  }))
+  .pipe(dest(jsMinDir))
+  .on('end', () => {
+    if(onEnd)
+      onEnd.call(this);
+
+    if(log)
+      _log('[JS] minified Finished', 'GREEN');
+  })
+  .pipe(plumber.stop());
+
+  if(ret) return minifyJS;
+}
+
 /**
  * End of helper
  */
@@ -140,6 +202,15 @@ function compileToSCSS() {
 
 function compileToHTML() {
   return _compileToHTML(htmlDir + htmlPathPattern, null, false, true);
+}
+
+function minifyCSS() {
+  return _minifyCSS(scssDir + scssPathPattern, null, false, true);
+}
+
+function minifyJS() {
+  jsPathPattern = "/*.js"
+  return _minifyJS(jsDir + jsPathPattern, null, false, true);
 }
 
 function watching() {
@@ -196,6 +267,8 @@ Object.assign(exports, {
   image,
   scss: compileToSCSS,
   html: compileToHTML,
-  dist: parallel(folder, compileToSCSS, compileToHTML),
+  minifycss: minifyCSS,
+  minifyjs: minifyJS,
+  dist: parallel(folder, compileToSCSS, compileToHTML, minifyCSS, minifyJS),
   default: watching
 });
