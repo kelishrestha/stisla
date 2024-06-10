@@ -13,6 +13,7 @@ const imageminMozjpeg = require('imagemin-mozjpeg');
 const nunjucks = require('gulp-nunjucks');
 const color = require('gulp-color');
 const nodePath = require('path');
+const uglifyCss = require('gulp-uglifycss');
 
 /**
  * Configuration
@@ -23,6 +24,11 @@ let cssDir = 'assets/css',
     htmlDir = 'src/pages',
     scssDir = 'src/scss',
     imgDir = 'assets/img';
+
+// Minify directory
+
+let cssMinDir = 'dist/css',
+jsMinDir = 'dist/js';
 
 let jsPathPattern = '/**/*.js',
     htmlPathPattern = '/**/*.html',
@@ -109,6 +115,37 @@ function _log(str, clr) {
   console.log(color(str, clr));
 }
 
+// Minification
+
+function _minifyCSS(path, onEnd, log=true, ret=false) {
+  if(log)
+    _log('[SCSS] Compiling:' + path, 'GREEN');
+
+  let compileToSCSS = src(path)
+  .pipe(plumber())
+  .pipe(sass({
+    errorLogToConsole: true
+  }))
+  .on('error', console.error.bind(console))
+  .on('end', () => {
+    if(onEnd)
+      onEnd.call(this);
+
+    if(log)
+      _log('[SCSS] Finished', 'GREEN');
+  })
+  .pipe(postcss([autoprefixer()]))
+  .pipe(uglifyCss())
+  .pipe(rename({
+    dirname: '',
+    extname: '.min.css'
+  }))
+  .pipe(dest(cssMinDir))
+  .pipe(plumber.stop());
+
+  if(ret) return compileToSCSS;
+}
+
 /**
  * End of helper
  */
@@ -142,9 +179,14 @@ function compileToHTML() {
   return _compileToHTML(htmlDir + htmlPathPattern, null, false, true);
 }
 
+function minifyCSS() {
+  return _minifyCSS(scssDir + scssPathPattern, null, false, true);
+}
+
 function watching() {
   compileToSCSS();
   compileToHTML();
+  minifyCSS();
 
   /**
    * BrowserSync initialization
@@ -196,6 +238,7 @@ Object.assign(exports, {
   image,
   scss: compileToSCSS,
   html: compileToHTML,
-  dist: parallel(folder, compileToSCSS, compileToHTML),
+  minifycss: minifyCSS,
+  dist: parallel(folder, compileToSCSS, compileToHTML, minifyCSS),
   default: watching
 });

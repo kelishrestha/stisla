@@ -3989,6 +3989,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"gulp-uglifycss@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "gulp-uglifycss@npm:1.1.0"
+  dependencies:
+    plugin-error: ^1.0.1
+    through2: ^2.0.3
+    uglifycss: ^0.0.25
+    vinyl: ^2.1.0
+  checksum: b40e8bc8692e291bd7af63baaee5a0e0a02448d515855bab61d809f088aba89e5df9b75d4554cea070ae36a2f8332fc17039d0ed347dd97e43682b70fd29767b
+  languageName: node
+  linkType: hard
+
 "gulp-util@npm:^3.0.1, gulp-util@npm:^3.0.8":
   version: 3.0.8
   resolution: "gulp-util@npm:3.0.8"
@@ -8351,6 +8363,7 @@ __metadata:
     gulp-sass: ^5.1.0
     gulp-uglify: ^3.0.1
     gulp-uglify-es: ^1.0.4
+    gulp-uglifycss: ^1.1.0
     imagemin-mozjpeg: ^8.0.0
     ionicons201: 1.0.0
     izitoast: ^1.4.0
@@ -8993,6 +9006,15 @@ __metadata:
   bin:
     uglifyjs: bin/uglifyjs
   checksum: 7b3897df38b6fc7d7d9f4dcd658599d81aa2b1fb0d074829dd4e5290f7318dbca1f4af2f45acb833b95b1fe0ed4698662ab61b87e94328eb4c0a0d3435baf924
+  languageName: node
+  linkType: hard
+
+"uglifycss@npm:^0.0.25":
+  version: 0.0.25
+  resolution: "uglifycss@npm:0.0.25"
+  bin:
+    uglifycss: ./uglifycss
+  checksum: 863abd84b98257f11608b922d0676197bdad81246ab7f99cb612717a9ab6bc4a73aaf78dc131204c0ee60045dac8abbe8a4ae8bc7177a2320e43d2a457da124f
   languageName: node
   linkType: hard
 
