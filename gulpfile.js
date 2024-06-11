@@ -83,7 +83,9 @@ function _compileToHTML(path, onEnd, log=true, ret=false) {
   if(ret) return compileToHTML;
 }
 
-function _compileToSCSS(path, onEnd, log=true, ret=false) {
+function _compileToSCSS(path, onEnd, log=true, ret=false, destDir="") {
+  destDir ||= cssDir;
+  _log('[SCSS] Compiling:' + destDir, 'GREEN');
   if(log)
     _log('[SCSS] Compiling:' + path, 'GREEN');
 
@@ -105,7 +107,7 @@ function _compileToSCSS(path, onEnd, log=true, ret=false) {
     extname: '.css'
   }))
   .pipe(postcss([autoprefixer()]))
-  .pipe(dest(cssDir))
+  .pipe(dest(destDir))
   .pipe(plumber.stop());
 
   if(ret) return compileToSCSS;
@@ -171,6 +173,29 @@ function _minifyJS(path, onEnd, log=true, ret=false) {
   if(ret) return minifyJS;
 }
 
+function _compileJS(path, onEnd, log=true, ret=false) {
+  if(log)
+    _log('[JS] Copying:' + path, 'GREEN');
+
+  let _compileJS = src(path)
+  .pipe(plumber())
+  .pipe(rename({
+    dirname: '',
+    extname: '.js'
+  }))
+  .pipe(dest(jsMinDir))
+  .on('end', () => {
+    if(onEnd)
+      onEnd.call(this);
+
+    if(log)
+      _log('[JS] copying Finished', 'GREEN');
+  })
+  .pipe(plumber.stop());
+
+  if(ret) return _compileJS;
+}
+
 /**
  * End of helper
  */
@@ -205,11 +230,13 @@ function compileToHTML() {
 }
 
 function minifyCSS() {
+  _compileToSCSS(scssDir + scssPathPattern, null, true, true, cssMinDir);
   return _minifyCSS(scssDir + scssPathPattern, null, false, true);
 }
 
 function minifyJS() {
   jsPathPattern = "/*.js"
+  _compileJS(jsDir + "/*.js", null, false, true);
   return _minifyJS(jsDir + jsPathPattern, null, false, true);
 }
 
